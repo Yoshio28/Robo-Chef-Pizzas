@@ -22,6 +22,6 @@ Lee **`docs/refero-styles.md`**: es el estándar visual (tokens, tipografía, es
 - Datos del negocio (teléfono, dirección, horario) aparecen en: HTML visible, JSON-LD, `main.js` (WhatsApp y horario). Manténlos sincronizados.
 - El dominio `https://robochefpizzas.example/` es un placeholder: aparece en canonical, OG, JSON-LD, `robots.txt` y `sitemap.xml`.
 - No pongas `transform` en CSS a elementos con `data-depth`.
-- Todo movimiento debe desactivarse con `prefers-reduced-motion`.
+- Con `prefers-reduced-motion` no debe haber desplazamientos; solo se permiten fundidos de opacidad/color.
 - Previsualizar: `python3 -m http.server -d src 8000`.
 - Deploy: Netlify publica `src/` según `netlify.toml` (sin build).

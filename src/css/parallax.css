@@ -218,10 +218,25 @@
 .hero.is-offscreen *{animation-play-state:paused !important;}
 
 /* ============ ACCESIBILIDAD ============ */
+/* Con "reducir movimiento" el robot sigue preparando la pizza, pero sin
+   desplazamientos: sin lanzar masa, sin brazos ni flotación, y las capas
+   aparecen con fundidos de opacidad en su lugar. */
 @media (prefers-reduced-motion: reduce){
-  .float-item, #mascot-idle, .steam, .scroll-cue .line, .rc-anim{animation:none !important;}
-  /* Estado estático: pizza terminada, cara neutral */
-  .rc-steam-group{opacity:1;}
-  .rc-smile, .rc-flour{opacity:0;}
+  .float-item, #mascot-idle, .steam, .scroll-cue .line,
+  .rc-pizza, .rc-arm-l, .rc-arm-r, .rc-head, .rc-flour{animation:none !important;}
+  .rc-flour{opacity:0;}
+  .rc-sauce{animation-name:rc-fade-sauce;}
+  .rc-cheese{animation-name:rc-fade-cheese;}
+  .rc-top.t1, .rc-top.t2, .rc-top.t3, .rc-top.t4{animation-timing-function:ease-in-out;}
+  .rc-top.t1{animation-name:rc-fade-t1;}
+  .rc-top.t2{animation-name:rc-fade-t2;}
+  .rc-top.t3{animation-name:rc-fade-t3;}
+  .rc-top.t4{animation-name:rc-fade-t4;}
   html{scroll-behavior:auto;}
 }
+@keyframes rc-fade-sauce { 0%,24%{opacity:0;} 32%,92%{opacity:1;} 97%,100%{opacity:0;} }
+@keyframes rc-fade-cheese{ 0%,38%{opacity:0;} 46%,92%{opacity:1;} 97%,100%{opacity:0;} }
+@keyframes rc-fade-t1    { 0%,50%{opacity:0;} 54%,92%{opacity:1;} 97%,100%{opacity:0;} }
+@keyframes rc-fade-t2    { 0%,55%{opacity:0;} 59%,92%{opacity:1;} 97%,100%{opacity:0;} }
+@keyframes rc-fade-t3    { 0%,60%{opacity:0;} 64%,92%{opacity:1;} 97%,100%{opacity:0;} }
+@keyframes rc-fade-t4    { 0%,65%{opacity:0;} 69%,92%{opacity:1;} 97%,100%{opacity:0;} }

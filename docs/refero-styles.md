@@ -86,7 +86,7 @@ Escala:
 - Parallax por capas con `[data-depth]` (js/parallax.js + requestAnimationFrame). Nunca uses `transform` en CSS sobre un elemento con `data-depth`: el JS lo sobrescribe.
 - Mascota: flota (`bob` 3.2s) y prepara una pizza en ciclo de 9s (lanza masa → salsa → queso → ingredientes → vapor y sonrisa). Ver `src/css/parallax.css`.
 - Duraciones UI: 150–300ms, `ease` o `cubic-bezier(.2,.8,.2,1)`.
-- `prefers-reduced-motion: reduce` desactiva toda animación y muestra la pizza terminada.
+- `prefers-reduced-motion: reduce` quita todo desplazamiento (parallax, flotación, lanzamiento de masa, brazos); el robot sigue preparando la pizza solo con fundidos de opacidad.
 
 ## Reglas UI
 
