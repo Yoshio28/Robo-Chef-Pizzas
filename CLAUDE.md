@@ -24,3 +24,4 @@ Lee **`docs/refero-styles.md`**: es el estándar visual (tokens, tipografía, es
 - No pongas `transform` en CSS a elementos con `data-depth`.
 - Todo movimiento debe desactivarse con `prefers-reduced-motion`.
 - Previsualizar: `python3 -m http.server -d src 8000`.
+- Deploy: Netlify publica `src/` según `netlify.toml` (sin build).

@@ -6,7 +6,7 @@ Sitio web de **RoboChef Pizzas**, pizzería en San Benito, Hermosillo, Sonora. M
 
 ```
 .
-├── .github/workflows/deploy.yml   # Deploy de src/ a GitHub Pages
+├── netlify.toml                   # Config de deploy en Netlify (publica src/)
 ├── docs/refero-styles.md          # Estándar visual
 ├── src/
 │   ├── assets/img/                # og-image.jpg, favicon, apple-touch-icon
@@ -31,7 +31,7 @@ Abre http://localhost:8000.
 
 ## Deploy
 
-El workflow publica `src/` en GitHub Pages en cada push a `main`. Actívalo en *Settings → Pages → Source: GitHub Actions*.
+Netlify, conectado al repo. `netlify.toml` ya define la carpeta a publicar (`src/`) y que no hay comando de build, así que Netlify despliega solo en cada push a `main` y genera *deploy previews* para cada PR.
 
 ## Antes de publicar
 
