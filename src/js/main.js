@@ -66,17 +66,37 @@
   });
 
   /* ---------- CARRITO ---------- */
+  // Cada línea del carrito: {name, meta, price (unitario), qty}.
+  // Productos iguales (mismo nombre y tamaño/ingredientes) se agrupan en una sola línea.
   var cart = [];
+  function itemKey(it) { return it.name + "|" + (it.meta || ""); }
   try {
-    var raw = localStorage.getItem("robochef_cart");
-    if (raw) cart = JSON.parse(raw) || [];
+    var raw = JSON.parse(localStorage.getItem("robochef_cart") || "[]");
+    if (Array.isArray(raw)) {
+      raw.forEach(function (it) {
+        if (!it || !it.name) return;
+        mergeIntoCart({ name: it.name, meta: it.meta || "", price: Number(it.price) || 0, qty: Math.max(1, parseInt(it.qty, 10) || 1) });
+      });
+    }
   } catch (e) { cart = []; }
+
+  function mergeIntoCart(item) {
+    var key = itemKey(item);
+    for (var i = 0; i < cart.length; i++) {
+      if (itemKey(cart[i]) === key) { cart[i].qty += item.qty; return cart[i]; }
+    }
+    cart.push(item);
+    return item;
+  }
 
   function saveCart() {
     try { localStorage.setItem("robochef_cart", JSON.stringify(cart)); } catch (e) {}
   }
   function cartTotal() {
-    return cart.reduce(function (s, it) { return s + it.price; }, 0);
+    return cart.reduce(function (s, it) { return s + it.price * it.qty; }, 0);
+  }
+  function cartQty() {
+    return cart.reduce(function (s, it) { return s + it.qty; }, 0);
   }
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, function (c) {
@@ -84,17 +104,55 @@
     });
   }
 
-  function addItem(item) {
-    cart.push(item);
+  // Agregar NO abre el carrito: se confirma en el botón, el contador y un aviso.
+  function addItem(item, btn) {
+    item.qty = 1;
+    var line = mergeIntoCart(item);
     saveCart();
     renderCart();
-    openCart();
+    confirmAdded(btn, line);
+  }
+  function changeQty(i, delta) {
+    if (!cart[i]) return;
+    cart[i].qty += delta;
+    if (cart[i].qty <= 0) cart.splice(i, 1);
+    saveCart();
+    renderCart();
   }
   function removeItem(i) {
     cart.splice(i, 1);
     saveCart();
     renderCart();
   }
+
+  var toastTimer, btnTimers = new WeakMap();
+  function confirmAdded(btn, line) {
+    if (btn) {
+      var original = btn.dataset.label || btn.textContent;
+      btn.dataset.label = original;
+      btn.textContent = "Agregado ✓";
+      btn.classList.add("added");
+      clearTimeout(btnTimers.get(btn));
+      btnTimers.set(btn, setTimeout(function () {
+        btn.textContent = original;
+        btn.classList.remove("added");
+      }, 1400));
+    }
+    var badge = $("cartCount");
+    badge.classList.remove("bump");
+    void badge.offsetWidth; // reinicia la animación
+    badge.classList.add("bump");
+
+    $("cartToastText").textContent = (line.qty > 1 ? line.qty + "× " : "") + line.name + " en tu pedido";
+    var toast = $("cartToast");
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 3200);
+  }
+  $("cartToastBtn").addEventListener("click", function () {
+    $("cartToast").classList.remove("show");
+    openCart();
+  });
 
   function renderCart() {
     var el = $("cartItems");
@@ -104,15 +162,26 @@
       countEl.hidden = true;
     } else {
       countEl.hidden = false;
-      countEl.textContent = cart.length;
+      countEl.textContent = cartQty();
       el.innerHTML = cart.map(function (it, i) {
+        var name = escapeHtml(it.name);
         return '<div class="cart-item">' +
           "<div>" +
-            '<div class="ci-name">' + escapeHtml(it.name) + "</div>" +
+            '<div class="ci-name">' + (it.qty > 1 ? it.qty + "× " : "") + name + "</div>" +
             (it.meta ? '<div class="ci-meta">' + escapeHtml(it.meta) + "</div>" : "") +
-            '<button class="ci-remove" data-i="' + i + '">Quitar</button>' +
+            '<div class="ci-actions">' +
+              '<span class="ci-qty">' +
+                '<button type="button" data-i="' + i + '" data-delta="-1" aria-label="Quitar uno de ' + name + '">−</button>' +
+                '<output aria-label="Cantidad">' + it.qty + "</output>" +
+                '<button type="button" data-i="' + i + '" data-delta="1" aria-label="Agregar uno más de ' + name + '">+</button>' +
+              "</span>" +
+              '<button class="ci-remove" data-i="' + i + '">Quitar</button>' +
+            "</div>" +
           "</div>" +
-          '<div class="ci-price">$' + it.price + "</div>" +
+          "<div>" +
+            '<div class="ci-price">$' + it.price * it.qty + "</div>" +
+            (it.qty > 1 ? '<div class="ci-unit">$' + it.price + " c/u</div>" : "") +
+          "</div>" +
         "</div>";
       }).join("");
     }
@@ -130,7 +199,9 @@
         return;
       }
       var sv = $("buildSize").value.split("|");
-      addItem({ name: "Arma tu pizza", meta: sv[0] + " · " + selectedChips.join(", "), price: parseInt(sv[1], 10) });
+      // Orden alfabético: la misma combinación se agrupa aunque se elija en otro orden.
+      var ings = selectedChips.slice().sort(function (a, b) { return a.localeCompare(b, "es"); });
+      addItem({ name: "Arma tu pizza", meta: sv[0] + " · " + ings.join(", "), price: parseInt(sv[1], 10) }, btn);
       selectedChips = [];
       refreshChips();
       return;
@@ -138,15 +209,17 @@
 
     if (btn.dataset.kind === "sized") {
       var parts = $(btn.dataset.sel).value.split("|");
-      addItem({ name: btn.dataset.name, meta: parts[0], price: parseInt(parts[1], 10) });
+      addItem({ name: btn.dataset.name, meta: parts[0], price: parseInt(parts[1], 10) }, btn);
     } else if (btn.dataset.kind === "fixed") {
-      addItem({ name: btn.dataset.name, meta: "", price: parseInt(btn.dataset.price, 10) });
+      addItem({ name: btn.dataset.name, meta: "", price: parseInt(btn.dataset.price, 10) }, btn);
     }
   });
 
   $("cartItems").addEventListener("click", function (e) {
     var rm = e.target.closest(".ci-remove");
-    if (rm) removeItem(parseInt(rm.dataset.i, 10));
+    if (rm) { removeItem(parseInt(rm.dataset.i, 10)); return; }
+    var q = e.target.closest(".ci-qty button");
+    if (q) changeQty(parseInt(q.dataset.i, 10), parseInt(q.dataset.delta, 10));
   });
 
   var orderType = "Recoger en el local";
@@ -157,16 +230,40 @@
     Array.prototype.forEach.call(this.querySelectorAll("button"), function (x) {
       x.classList.toggle("sel", x === b);
     });
+    var delivery = isDelivery();
+    $("addressWrap").hidden = !delivery;
+    $("custAddress").required = delivery;
+    if (!delivery) setAddressError(false);
     updateWaLink();
   });
   $("custName").addEventListener("input", updateWaLink);
   $("custNote").addEventListener("input", updateWaLink);
+  $("custAddress").addEventListener("input", function () {
+    if (this.value.trim()) setAddressError(false);
+    updateWaLink();
+  });
+
+  var DELIVERY = "Entrega a domicilio";
+  function isDelivery() { return orderType === DELIVERY; }
+  function setAddressError(show) {
+    $("addressError").hidden = !show;
+    $("custAddress").setAttribute("aria-invalid", show ? "true" : "false");
+  }
+  // A domicilio, el domicilio es obligatorio: sin él no se abre WhatsApp.
+  $("sendWaBtn").addEventListener("click", function (e) {
+    if (isDelivery() && !$("custAddress").value.trim()) {
+      e.preventDefault();
+      setAddressError(true);
+      $("custAddress").focus();
+    }
+  });
 
   function buildWaMessage() {
     var lines = ["Hola RoboChef Pizzas! Quiero hacer un pedido:"];
     if (cart.length) {
       cart.forEach(function (it) {
-        lines.push("• " + it.name + (it.meta ? " (" + it.meta + ")" : "") + " — $" + it.price);
+        lines.push("• " + (it.qty > 1 ? it.qty + "× " : "") + it.name + (it.meta ? " (" + it.meta + ")" : "") +
+          " — $" + it.price * it.qty + (it.qty > 1 ? " ($" + it.price + " c/u)" : ""));
       });
       lines.push("Total estimado: $" + cartTotal());
     } else {
@@ -175,6 +272,8 @@
     lines.push("Tipo de pedido: " + orderType);
     var name = $("custName").value.trim();
     if (name) lines.push("Nombre: " + name);
+    var address = $("custAddress").value.trim();
+    if (isDelivery() && address) lines.push("Domicilio: " + address);
     var note = $("custNote").value.trim();
     if (note) lines.push("Notas: " + note);
     return lines.join("\n");
