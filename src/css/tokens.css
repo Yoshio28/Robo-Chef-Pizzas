@@ -1,0 +1,55 @@
+/* ==========================================================================
+   tokens.css — Variables de diseño de RoboChef Pizzas
+   Fuente de verdad: docs/refero-styles.md. No inventes colores fuera de aquí.
+   ========================================================================== */
+:root{
+  --ink:#14151A;
+  --paper:#FBF7EC;
+  --paper-dim:#EFE9D8;
+  --red:#E1332B;
+  --red-deep:#A8241D;
+  --amber:#F4B63F;
+  --teal:#35C9B0;
+  --steel:#8A8F98;
+  --line: rgba(251,247,236,0.14);
+
+  --bg: var(--ink);
+  --surface: #1C1E24;
+  --surface-2: #23262E;
+  --text: var(--paper);
+  --text-dim: #B9BCC4;
+  --accent: var(--red);
+  --accent-2: var(--amber);
+  --accent-3: var(--teal);
+  --border: var(--line);
+  --paper-surface: var(--paper);
+  --paper-text: #201F1C;
+
+  --font-display: "Archivo Black", "Arial Black", sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+  --font-body: "Work Sans", system-ui, sans-serif;
+
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#EFE9D8;
+    --surface:#FBF7EC;
+    --surface-2:#F3EDDD;
+    --text:#1B1B1A;
+    --text-dim:#4B4B47;
+    --border: rgba(20,21,26,0.14);
+    --paper-surface:#FFFFFF;
+    --paper-text:#201F1C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg: var(--ink);
+  --surface:#1C1E24;
+  --surface-2:#23262E;
+  --text: var(--paper);
+  --text-dim:#B9BCC4;
+  --border: var(--line);
+}

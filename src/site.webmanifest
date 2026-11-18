@@ -1,0 +1,14 @@
+{
+  "name": "RoboChef Pizzas",
+  "short_name": "RoboChef",
+  "description": "Pizzería en San Benito, Hermosillo. Pide por WhatsApp.",
+  "lang": "es-MX",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#14151A",
+  "theme_color": "#14151A",
+  "icons": [
+    { "src": "assets/img/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "assets/img/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" }
+  ]
+}
