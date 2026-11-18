@@ -270,12 +270,14 @@
       lines.push("(agregar productos desde el menú)");
     }
     lines.push("Tipo de pedido: " + orderType);
-    var name = $("custName").value.trim();
-    if (name) lines.push("Nombre: " + name);
     var address = $("custAddress").value.trim();
     if (isDelivery() && address) lines.push("Domicilio: " + address);
+    var name = $("custName").value.trim();
+    if (name) lines.push("Nombre: " + name);
     var note = $("custNote").value.trim();
     if (note) lines.push("Notas: " + note);
+    lines.push("");
+    lines.push("Su pedido quedará confirmado una vez que le respondamos este mensaje.");
     return lines.join("\n");
   }
   function updateWaLink() {
