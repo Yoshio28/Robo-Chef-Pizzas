@@ -233,28 +233,35 @@
     var delivery = isDelivery();
     $("addressWrap").hidden = !delivery;
     $("custAddress").required = delivery;
-    if (!delivery) setAddressError(false);
+    if (!delivery) setFieldError("custAddress", "addressError", false);
     updateWaLink();
   });
-  $("custName").addEventListener("input", updateWaLink);
+  $("custName").addEventListener("input", function () {
+    if (this.value.trim()) setFieldError("custName", "nameError", false);
+    updateWaLink();
+  });
   $("custNote").addEventListener("input", updateWaLink);
   $("custAddress").addEventListener("input", function () {
-    if (this.value.trim()) setAddressError(false);
+    if (this.value.trim()) setFieldError("custAddress", "addressError", false);
     updateWaLink();
   });
 
   var DELIVERY = "Entrega a domicilio";
   function isDelivery() { return orderType === DELIVERY; }
-  function setAddressError(show) {
-    $("addressError").hidden = !show;
-    $("custAddress").setAttribute("aria-invalid", show ? "true" : "false");
+  function setFieldError(inputId, errorId, show) {
+    $(errorId).hidden = !show;
+    $(inputId).setAttribute("aria-invalid", show ? "true" : "false");
   }
-  // A domicilio, el domicilio es obligatorio: sin él no se abre WhatsApp.
+  // El nombre siempre es obligatorio y el domicilio cuando es a domicilio:
+  // si falta alguno no se abre WhatsApp y se señala el primer campo vacío.
   $("sendWaBtn").addEventListener("click", function (e) {
-    if (isDelivery() && !$("custAddress").value.trim()) {
+    var missingName = !$("custName").value.trim();
+    var missingAddress = isDelivery() && !$("custAddress").value.trim();
+    setFieldError("custName", "nameError", missingName);
+    setFieldError("custAddress", "addressError", missingAddress);
+    if (missingName || missingAddress) {
       e.preventDefault();
-      setAddressError(true);
-      $("custAddress").focus();
+      $(missingName ? "custName" : "custAddress").focus();
     }
   });
 

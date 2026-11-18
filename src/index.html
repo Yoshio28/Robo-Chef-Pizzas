@@ -1205,7 +1205,9 @@
       <button data-type="Pedido desde el auto">Auto</button>
       <button data-type="Entrega a domicilio">A domicilio</button>
     </div>
-    <input class="cart-field" id="custName" placeholder="Tu nombre" aria-label="Tu nombre" autocomplete="name">
+    <label class="cart-label" for="custName">Nombre <span aria-hidden="true">*</span></label>
+    <input class="cart-field" id="custName" placeholder="Tu nombre" autocomplete="name" required aria-describedby="nameError">
+    <p class="field-error" id="nameError" role="alert" hidden>Escribe tu nombre para identificar tu pedido.</p>
     <div class="address-wrap" id="addressWrap" hidden>
       <label class="cart-label" for="custAddress">Domicilio de entrega <span aria-hidden="true">*</span></label>
       <input class="cart-field" id="custAddress" placeholder="Calle, número, colonia y referencias" autocomplete="street-address" aria-describedby="addressError">
